@@ -6,12 +6,12 @@ def SEISmodel(theta, L, S, E, I):
     gamma = theta[2]
     mu = theta[3]
     Ks = theta[4]
-    Ke = theta[5]
-    Ki = theta[6]
-
-    dSdt = -Ks*L@S-beta * E * S - gamma * I * S # dS/dt
-    dEdt = -Ke*L@E+beta * E * S + gamma * I * S - alpha * E  # dE/dt
-    dIdt = -Ki*L@I+alpha * E - mu * I  # dI/dt
+    Ke= theta[4]
+    Ki = theta[5]
+    for i in range (13):
+        dSdt = -Ks*L@S-beta * E * S - gamma * I * S # dS/dt
+        dEdt = -Ke*L@E+beta * E * S + gamma * I * S - alpha * E  # dE/dt
+        dIdt = -Ki*L@I+alpha * E - mu * I  # dI/dt
 
     return dSdt, dEdt, dIdt
 
