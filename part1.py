@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from scipy.sparse.csgraph import laplacian
 import matplotlib.pyplot as plt
-from methods import integrateSEIS,minimuim
+from methods import integrateSEIS
 A = np.array([[1,     1,     1,     0,     0,     0,     0,     0,     1,     0,     1,     1,     1],
      [1,     1,     1,     0,     0,     1,     0,     0,     1,     0,     1,     1,     0],
      [1,     1,     1,     0,     0,     1,     0,     1,     1,     0,     1,     1,     0],

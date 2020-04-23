@@ -44,16 +44,7 @@ def loss(Sobs,Eobs,Iobs,Scomp,Ecomp,Icomp):
     phi=torch.sum((Scomp-Sobs)**2)+torch.sum((Ecomp-Eobs)**2)+torch.sum((Icomp-Iobs)**2)
 
     return phi
-#TODO:edit minmuim function for this case
-def minimuim(theta,mu, nu):
-    d=1
-    while d > nu:
-        f=function(theta)
-        theta=Steepest_Descent(theta,mu)
-        d=abs(f-function(theta))
-        print(theta)
-
-    return theta
+#TODO:edit functions for this case
 
 def gradient(theta):
     y=function(theta)
