@@ -1,10 +1,12 @@
 import torch
+import numpy as np
+from scipy.sparse.csgraph import laplacian
 
 def SEISmodel(theta, L, S, E, I):
-    alpha = theta[0]
-    beta = theta[1]
+    alpha=0.2
+    mu=0.01
+    beta = theta[0]
     gamma = theta[2]
-    mu = theta[3]
     Ks = theta[4]
     Ke= theta[4]
     Ki = theta[5]
@@ -16,8 +18,22 @@ def SEISmodel(theta, L, S, E, I):
     return dSdt, dEdt, dIdt
 
 
-def integrateSEIS(theta, L, S0, E0, I0, dt, nt):
+def integrateSEIS(theta, S0, E0, I0, dt, nt):
     # vectors to save the results over time
+    A = np.array([[1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1],
+                  [1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0],
+                  [1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0],
+                  [0, 0, 0, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0],
+                  [0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0],
+                  [0, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1],
+                  [0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 1, 0, 0],
+                  [0, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1],
+                  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                  [0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0],
+                  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+                  [1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0],
+                  [1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1]])
+    L = torch.from_numpy(laplacian(A))
     Sout = torch.zeros(13,nt + 1)
     Sout[:,0] = S0
     Eout = torch.zeros(13,nt + 1)
@@ -40,14 +56,15 @@ def integrateSEIS(theta, L, S0, E0, I0, dt, nt):
 
     return Sout, Eout, Iout
 
-def loss(Sobs,Eobs,Iobs,Scomp,Ecomp,Icomp):
+def loss(Sobs,Eobs,Iobs, theta, S0, E0, I0, dt, nt):
+    Scomp, Ecomp, Icomp=integrateSEIS(theta, S0, E0,I0,dt,nt)
     phi=torch.sum((Scomp-Sobs)**2)+torch.sum((Ecomp-Eobs)**2)+torch.sum((Icomp-Iobs)**2)
 
     return phi
 #TODO:edit functions for this case
 
 def gradient(theta):
-    y=function(theta)
+    y=loss(theta)
     y.backward()
     grady=theta.grad
     return grady
