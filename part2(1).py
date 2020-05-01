@@ -20,18 +20,18 @@ dt=1.0
 nt=Iobs[0].shape
 nt=nt[0]
 nu=0.0001
-mu=0.1
+mu=0.001
 d=1
-optimizer = optim.Adam([theta],lr=mu)
+#optimizer = optim.SGD([theta],lr=mu)
 
 while d > nu:
     phi=loss(Iobs, theta, S0, E0, I0,dt,nt)
     phi.backward()
-    optimizer.step()
-    '''grady=theta.grad
+    #optimizer.step()
+    grady=theta.grad
     with torch.no_grad():
         theta -=mu*grady
-    d=abs(phi-loss(theta))
-    print(theta)'''
-    optimizer.zero_grad()
+    d=abs(phi-loss(Iobs, theta, S0, E0, I0,dt,nt))
+    theta.grad.zero_()
+    #optimizer.zero_grad()
     print (phi)

@@ -3,7 +3,7 @@ from methods import import_csv
 import numpy as np
 from datetime import datetime
 import time
+import torch
 
-enddate='19-04-2020'
-df=import_csv(enddate)
-print (df)
+import_csv('19-04-2020')
+

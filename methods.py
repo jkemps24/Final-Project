@@ -18,9 +18,7 @@ def SEISmodel(theta, L, S, E, I):
 
     return dSdt, dEdt, dIdt
 
-
 def integrateSEIS(theta, S0, E0, I0, dt, nt):
-    # vectors to save the results over time
     A = np.array([[1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1],
                   [1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0],
                   [1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0],
@@ -35,34 +33,32 @@ def integrateSEIS(theta, S0, E0, I0, dt, nt):
                   [1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0],
                   [1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1]])
     L = torch.from_numpy(laplacian(A))
-    Sout = torch.zeros(13,nt + 1)
+    Sout = torch.ones(13,nt,requires_grad=False)
     Sout[:,0] = S0
-    Eout = torch.zeros(13,nt + 1)
+    Eout = torch.zeros(13,nt,requires_grad=False)
     Eout[:,0] = E0
-    Iout = torch.zeros(13,nt + 1)
+    Iout = torch.zeros(13,nt,requires_grad=False)
     Iout[:,0] = I0
 
     S = S0
     E = E0
     I = I0
-    for i in range(nt):
+    for i in range(nt-1):
             dSdt, dEdt, dIdt = SEISmodel(theta, L, S, E, I)
-            S += dt * dSdt
-            E += dt * dEdt
-            I += dt * dIdt
+            Sout[:,i+1] = Sout[:,i]+dt * dSdt
+            Eout[:,i+1]=Eout[:,i]+dt * dEdt
+            Iout[:,i+1] = Iout[:,i]+dt * dIdt
 
-            Sout[:,i + 1] = S
-            Eout[:,i + 1] = E
-            Iout[:,i + 1] = I
+            #Sout[:,i + 1] = S
+            #Eout[:,i + 1] = E
+            #Iout[:,i + 1] = I
 
     return Sout, Eout, Iout
 
-def loss(Sobs,Eobs,Iobs, theta, S0, E0, I0, dt, nt):
+def loss(Iobs, theta, S0, E0, I0, dt, nt):
     Scomp, Ecomp, Icomp=integrateSEIS(theta, S0, E0,I0,dt,nt)
     phi=torch.sum((Icomp-Iobs)**2)
-
     return phi
-#TODO:edit functions for this case
 
 def gradient(theta):
     phi=loss(theta)
@@ -74,7 +70,7 @@ def Steepest_Descent(theta, mu):
     g=gradient(theta)
     theta=theta-mu*g
     return theta
-#TODO:set up date checking
+
 def import_csv(enddate):
     pruid=[48,59,46,13,10,61,12,62,35,11,24,47,60]
     df=pd.read_csv('covid19.csv')
@@ -85,12 +81,16 @@ def import_csv(enddate):
         data=df[df.pruid.eq(pruid[i])]
         data.set_index('date', inplace=True)
         data.sort_index(inplace=True)
-        idx = pd.date_range(start='01-31-2020',end='04-19-2020',freq='D')
+        idx = pd.date_range(start='01-31-2020',end=enddate,freq='D')
         data=data.reindex(idx)
+        if data['numconf']['01-31-2020']!=data['numconf']['01-31-2020']:
+            data['numconf']['01-31-2020']=0
+        data=data.fillna(method='ffill')
         t = torch.tensor(data['numconf'].values)
         for j in range (80):
             torch_data[i,j]=t[j]
     return torch_data
+
 def switch(argument):
     switcher = {
         0:"48",
