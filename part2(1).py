@@ -35,3 +35,4 @@ while d > nu:
     theta.grad.zero_()
     #optimizer.zero_grad()
     print (phi)
+    print(theta)

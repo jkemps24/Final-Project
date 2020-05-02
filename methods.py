@@ -6,15 +6,16 @@ from scipy.sparse.csgraph import laplacian
 def SEISmodel(theta, L, S, E, I):
     alpha=0.2
     mu=0.01
-    beta = theta[0]
-    gamma = theta[1]
-    Ks = theta[2]
-    Ke= theta[2]
-    Ki = theta[3]
+    beta=theta[0]
+    gamma=theta[1]
+    K=theta[2]
+    Ks = K
+    Ke= K
+    Ki=theta[3]
     for i in range (13):
-        dSdt = -Ks*L@S-beta * E * S - gamma * I * S # dS/dt
-        dEdt = -Ke*L@E+beta * E * S + gamma * I * S - alpha * E  # dE/dt
-        dIdt = -Ki*L@I+alpha * E - mu * I  # dI/dt
+        dSdt = -theta[2]*L@S-theta[0] * E * S - theta[1] * I * S # dS/dt
+        dEdt = -theta[2]*L@E+theta[0] * E * S + theta[1] * I * S - alpha * E  # dE/dt
+        dIdt = -theta[3]*L@I+alpha * E - mu * I  # dI/dt
 
     return dSdt, dEdt, dIdt
 
@@ -55,7 +56,7 @@ def integrateSEIS(theta, S0, E0, I0, dt, nt):
 
     return Sout, Eout, Iout
 
-def loss(Iobs, theta, S0, E0, I0, dt, nt):
+def loss(Iobs,theta, S0, E0, I0,dt,nt):
     Scomp, Ecomp, Icomp=integrateSEIS(theta, S0, E0,I0,dt,nt)
     phi=torch.sum((Icomp-Iobs)**2)
     return phi
