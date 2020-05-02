@@ -4,11 +4,7 @@ from methods import loss, Steepest_Descent,import_csv
 
 # 𝑃={′𝐴𝐵′,′𝐵𝐶′,′𝑀𝐵′,′𝑁𝐵′,′𝑁𝐿′,′𝑁𝑇′,′𝑁𝑆′,′𝑁𝑈′,′𝑂𝑁′,′𝑃𝐸′,′𝑄𝐶′,′𝑆𝐾′,′𝑌𝑇′}
 # alpha and mu are disease dependant
-beta=torch.tensor(0.3,requires_grad=True)
-gamma=torch.tensor(0.01,requires_grad=True)
-# K=Ks=Ke as susceptible pop is just as mobile as effected
-K=torch.tensor(0.2,requires_grad=True)
-Ki=torch.tensor(0.01,requires_grad=True)
+
 theta=torch.tensor([beta,gamma,K,Ki],requires_grad=True)
 
 S0=torch.FloatTensor([4345737.0,5020302.0,1360396.0,772094.0,523790.0,44598.0,965382.0,38787.0,14446515.0,154748.0,8433301.0,1168423.0,40369.0])
