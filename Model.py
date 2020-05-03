@@ -6,10 +6,10 @@ from scipy.sparse.csgraph import laplacian
 class SEIModel(nn.Module):
     def __init__(self):
         super().__init__()
-        self.beta=nn.Parameter(torch.tensor(-0.0020,requires_grad=True))
-        self.gamma = nn.Parameter(torch.tensor(0.0073, requires_grad=True))
-        self.K = nn.Parameter(torch.tensor(0.0006, requires_grad=True))
-        self.Ki = nn.Parameter(torch.tensor(0.01, requires_grad=True))
+        self.beta=nn.Parameter(torch.tensor(0.1,requires_grad=True))
+        self.gamma = nn.Parameter(torch.tensor(0.1, requires_grad=True))
+        self.K = nn.Parameter(torch.tensor(0.1, requires_grad=True))
+        self.Ki = nn.Parameter(torch.tensor(0.1, requires_grad=True))
 
 
 

@@ -9,24 +9,23 @@ model=SEIModel()
 
 print(model.state_dict())
 
-lr =1e-6
+lr =1e-2
 
 n_epochs = 10000
 
 loss_fn=nn.MSELoss(reduction='mean')
-optimizer = optim.SGD(model.parameters(),lr=lr, momentum=0.8)
-Iobs=import_csv('19-04-2020')
+optimizer = optim.SGD(model.parameters(),lr=lr)
 
 S0=torch.FloatTensor([4345737.0,5020302.0,1360396.0,772094.0,523790.0,44598.0,965382.0,38787.0,14446515.0,154748.0,8433301.0,1168423.0,40369.0])
 E0=torch.zeros(13)
 I0=torch.FloatTensor([0,1,0,0,0,0,0,0,3,0,0,0,0])
-nt=Iobs[0].shape
-nt=nt[0]
+nt=46
 dt=1.0
-Sobs=torch.zeros(13,80)
-Iobs=import_csv('19-04-2020')
+Sobs=torch.zeros(13,46)
+Iobstemp=import_csv('19-04-2020')
+Iobs=Iobstemp[:,:46]
 for i in range(13):
-    for j in range(80):
+    for j in range(46):
         Sobs[i,j]=S0[i]-Iobs[i,j]
 tensor_list=[Sobs,Iobs]
 obs=torch.stack(tensor_list)
