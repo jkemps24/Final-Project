@@ -1,31 +1,29 @@
 import torch
 import torch.nn as nn
+import numpy as np
+from scipy.sparse.csgraph import laplacian
+
 class SEIModel(nn.Module):
-    def _init_(self):
-        super._init_()
-        self.beta=nn.Parameter(torch.tensor(0.3,requires_grad=True))
-        self.gamma = nn.Parameter(torch.tensor(0.1, requires_grad=True))
-        self.K = nn.Parameter(torch.tensor(0.2, requires_grad=True))
+    def __init__(self):
+        super().__init__()
+        self.beta=nn.Parameter(torch.tensor(-0.0020,requires_grad=True))
+        self.gamma = nn.Parameter(torch.tensor(0.0073, requires_grad=True))
+        self.K = nn.Parameter(torch.tensor(0.0006, requires_grad=True))
         self.Ki = nn.Parameter(torch.tensor(0.01, requires_grad=True))
 
-    def forward(self):
-        alpha = 0.2
-        mu = 0.01
 
 
-    def SEISmodel(beta, gamma, K, Ki, L, S, E, I):
+    def SEISmodel(self, L, S, E, I):
         alpha = 0.2
         mu = 0.01
-        Ks = K
-        Ke = K
         for i in range(13):
-            dSdt = -Ks * L @ S - beta * E * S - gamma * I * S  # dS/dt
-            dEdt = -Ke * L @ E + beta * E * S + gamma * I * S - alpha * E  # dE/dt
-            dIdt = -Ki * L @ I + alpha * E - mu * I  # dI/dt
+            dSdt = -self.K * L @ S - self.beta * E * S - self.gamma * I * S  # dS/dt
+            dEdt = -self.K * L @ E + self.beta * E * S + self.gamma * I * S - alpha * E  # dE/dt
+            dIdt = -self.Ki * L @ I + alpha * E - mu * I  # dI/dt
 
         return dSdt, dEdt, dIdt
 
-    def integrateSEIS(beta, gamma, K, Ki, S0, E0, I0, dt, nt):
+    def forward(self, S0, E0, I0, dt, nt):
         A = np.array([[1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1],
                       [1, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 1, 0],
                       [1, 1, 1, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0],
@@ -51,13 +49,13 @@ class SEIModel(nn.Module):
         E = E0
         I = I0
         for i in range(nt - 1):
-            dSdt, dEdt, dIdt = SEISmodel(beta, gamma, K, Ki, L, S, E, I)
+            dSdt, dEdt, dIdt = self.SEISmodel(L, S, E, I)
             Sout[:, i + 1] = Sout[:, i] + dt * dSdt
             Eout[:, i + 1] = Eout[:, i] + dt * dEdt
             Iout[:, i + 1] = Iout[:, i] + dt * dIdt
 
-            # Sout[:,i + 1] = S
-            # Eout[:,i + 1] = E
-            # Iout[:,i + 1] = I
+        out=torch.zeros(2,13,nt)
+        out[0]=Sout
+        out[1]=Iout
 
-        return Sout, Eout, Iout
+        return out
