@@ -1,7 +1,6 @@
 import torch
 from Model import SEIModel
 import matplotlib.pyplot as plt
-import numpy
 
 
 model=SEIModel()
