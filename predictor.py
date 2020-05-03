@@ -1,5 +1,7 @@
 import torch
 from Model import SEIModel
+import matplotlib.pyplot as plt
+import numpy
 
 
 model=SEIModel()
@@ -10,3 +12,10 @@ nt=400
 dt=1.0
 
 comp=model(S0,E0,I0,dt,nt)
+Icomp=comp[1,:].detach().numpy()
+
+t=torch.arange(nt)*dt
+for i in range (13):
+     plt.figure(i)
+     plt.plot(t,Icomp[i])
+plt.show()
