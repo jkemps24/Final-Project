@@ -1,36 +1,45 @@
 import torch
+import torch.nn as nn
 import torch.optim as optim
-from methods import loss, Steepest_Descent,import_csv
+from Model import SEIModel
+from methods import import_csv
 
-# 𝑃={′𝐴𝐵′,′𝐵𝐶′,′𝑀𝐵′,′𝑁𝐵′,′𝑁𝐿′,′𝑁𝑇′,′𝑁𝑆′,′𝑁𝑈′,′𝑂𝑁′,′𝑃𝐸′,′𝑄𝐶′,′𝑆𝐾′,′𝑌𝑇′}
-# alpha and mu are disease dependant
 
-theta=torch.tensor([beta,gamma,K,Ki],requires_grad=True)
+model=SEIModel()
+
+print(model.state_dict())
+
+lr =1e-6
+
+n_epochs = 10000
+
+loss_fn=nn.MSELoss(reduction='mean')
+optimizer = optim.SGD(model.parameters(),lr=lr, momentum=0.8)
+Iobs=import_csv('19-04-2020')
 
 S0=torch.FloatTensor([4345737.0,5020302.0,1360396.0,772094.0,523790.0,44598.0,965382.0,38787.0,14446515.0,154748.0,8433301.0,1168423.0,40369.0])
-E0=torch.FloatTensor([1,5,1,0,0,0,0,0,10,0,3,1,0])
+E0=torch.zeros(13)
 I0=torch.FloatTensor([0,1,0,0,0,0,0,0,3,0,0,0,0])
-Iobs=import_csv('19-04-2020')
+nt=80
 dt=1.0
-nt=Iobs[0].shape
-nt=nt[0]
-nu=0.0001
-mu=0.01
-d=1
-optimizer = optim.Adam([beta,gamma,K,Ki],lr=mu)
+Sobs=torch.zeros(13,80)
+Iobs=import_csv('19-04-2020')
+for i in range(13):
+    for j in range(80):
+        Sobs[i,j]=S0[i]-Iobs[i,j]
+tensor_list=[Sobs,Iobs]
+obs=torch.stack(tensor_list)
 
-while d > nu:
-    phi=loss(Iobs, beta,gamma,K,Ki, S0, E0, I0,dt,nt)
-    phi.backward()
+for epoch in range(n_epochs):
+    model.train()
+
+    comp=model(S0,E0,I0,dt,nt)
+
+    loss= loss_fn(obs,comp)
+    print(loss)
+    loss.backward()
+    nn.utils.clip_grad_norm_(model.parameters(),0.01)
     optimizer.step()
-    '''grady=theta.grad
-    with torch.no_grad():
-        theta -=mu*grady
-    d=abs(phi-loss(theta))
-    print(theta)'''
     optimizer.zero_grad()
-    print (phi)
-    print(beta)
-    print(gamma)
-    print(K)
-    print(Ki)
+    print(epoch)
+    print(model.state_dict())
